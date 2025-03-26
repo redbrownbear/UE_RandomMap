@@ -7,7 +7,6 @@
 #include "DataTable/TileResourceData.h"
 #include "SubSystems/MazeGeneratorSubSystem.h"
 
-#include "Actors/Map/MazeGenerator.h"
 #include "Actors/Map/DungeonMap.h"
 
 #include "MazeGeneratorManager.generated.h"
@@ -40,18 +39,19 @@ public:
 	void GenerateMap();
 	//void CompleteStage();
 
-	void DestroyGenerator();
 	void DestroyCurrentMap();
+
+public:
+	UWorld* GetWorld() const override { return WorldContext; }
+
+	void Initialize(UWorld* InWorld) { WorldContext = InWorld; }
 
 private:
 	static UMazeGeneratorManager* Instance;
 
 	UPROPERTY()
-	AMazeGenerator* CurrentMapGenerator;
+	UWorld* WorldContext;
 
 	UPROPERTY()
 	ADungeonMap* CurrentMap;
-
-	//UPROPERTY()
-	//맵
 };

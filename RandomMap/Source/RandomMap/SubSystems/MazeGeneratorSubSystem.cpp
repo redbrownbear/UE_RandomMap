@@ -36,22 +36,6 @@ void UMazeGeneratorSubSystem::LoadTable()
 					MeshData.Add(Row->TileType, LoadedMesh);
 				}
 			}
-
-			if (Row->TileMaterial.Len() > 0)
-			{
-				UMaterialInterface* LoadedMaterial = LoadObject<UMaterialInterface>(nullptr, *Row->TileMaterial);
-				if (LoadedMaterial)
-				{
-					MaterialData.Add(Row->TileType, LoadedMaterial);
-				}
-			}
 		}
 	}
-
-	
-	//auto Manager = UMazeGeneratorManager::GetInstance();
-	//if (Manager)
-	//{
-	//	Manager->GenerateMap();
-	//}
 }

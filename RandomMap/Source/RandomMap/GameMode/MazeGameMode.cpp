@@ -2,17 +2,18 @@
 
 
 #include "GameMode/MazeGameMode.h"
-#include "Actors/Map/MazeGenerator.h"
 #include "Managers/MazeGeneratorManager.h"
 
-void AMazeGameMode::BeginPlay()
+void AMazeGameMode::StartPlay()
 {
-	Super::BeginPlay();
+	Super::StartPlay();
 
-
-	auto Manager = UMazeGeneratorManager::GetInstance();
-	if (Manager)
+	//temp
 	{
-		Manager->GenerateMap();
+		UMazeGeneratorManager* mazeManager = NewObject<UMazeGeneratorManager>(this);
+		{
+			mazeManager->Initialize(GetWorld());
+			mazeManager->GenerateMap();
+		}
 	}
 }

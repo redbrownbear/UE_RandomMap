@@ -8,7 +8,6 @@
 
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/StaticMesh.h"
-#include "Materials/MaterialInterface.h"
 
 #include "MazeGeneratorSubSystem.generated.h"
 
@@ -30,15 +29,10 @@ public:
 public:
 	const TMap<ETileType, TObjectPtr<UStaticMesh>> GetMeshFromTable() { return MeshData; }
 
-	const TMap<ETileType, TObjectPtr<UMaterialInterface>> GetMaterialFromTable() { return MaterialData;}
-
 private:
 	UPROPERTY(EditAnywhere, Category = "ResourceTile")
 	UDataTable* ItemDataTable;
 
 	UPROPERTY()
 	TMap<ETileType, TObjectPtr<UStaticMesh>> MeshData;
-
-	UPROPERTY()
-	TMap<ETileType, TObjectPtr<UMaterialInterface>> MaterialData;
 };

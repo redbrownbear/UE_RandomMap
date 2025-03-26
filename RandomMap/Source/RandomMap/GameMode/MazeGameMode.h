@@ -3,17 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
+#include "GameFramework/GameModeBase.h"
 #include "MazeGameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class RANDOMMAP_API AMazeGameMode : public AGameMode
+class RANDOMMAP_API AMazeGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
-	virtual void BeginPlay() override;
-	
+public:
+	virtual void StartPlay() override;
+
 };

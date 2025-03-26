@@ -11,37 +11,25 @@ UMazeGeneratorManager::UMazeGeneratorManager()
 }
 void UMazeGeneratorManager::GenerateMap()
 {
-	if (CurrentMapGenerator) 
-		DestroyGenerator(); 
-	
 	if (CurrentMap)
 		DestroyCurrentMap();
 
-
-	// 맵 생성기 생성
-	AMazeGenerator* MapGenerator = NewObject<AMazeGenerator>();
+	ADungeonMap* DungeonMap = GetWorld()->SpawnActor<ADungeonMap>(ADungeonMap::StaticClass());
+	if (DungeonMap)
+	{
+		UE_LOG(LogTemp, Log, TEXT("MapGenerator created successfully."));
+	}
 	
 	UMazeGeneratorSubSystem* MazeSubsystem = GetWorld()->GetGameInstance()->GetSubsystem<UMazeGeneratorSubSystem>();
 	if (MazeSubsystem)
 	{
 		TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh = MazeSubsystem->GetMeshFromTable();
-		TMap<ETileType, TObjectPtr<UMaterialInterface>> TileMaterial = MazeSubsystem->GetMaterialFromTable();
 
-
-		MapGenerator->SetData(TileMesh, TileMaterial);
+		DungeonMap->SetData(TileMesh);
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("MazeGeneratorSubSystem is not available."));
-	}
-}
-
-void UMazeGeneratorManager::DestroyGenerator()
-{
-	if (CurrentMapGenerator)
-	{
-		CurrentMapGenerator->Destroy();
-		CurrentMapGenerator = nullptr;
 	}
 }
 

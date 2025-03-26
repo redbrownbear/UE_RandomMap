@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
+#include "DataTable/TileResourceData.h"
+
 #include "DungeonMap.generated.h"
 
 UCLASS()
@@ -22,5 +25,19 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+public:
+	void SetData(TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh);
+
+public:
+	void GenrateMaze();
+
+
+private:
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* DefaultSceneRoot;
+
+	UPROPERTY()
+	TMap<ETileType, TObjectPtr<UStaticMesh>> GeneratorTileMesh;
 
 };
