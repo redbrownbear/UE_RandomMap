@@ -28,9 +28,13 @@ public:
 
 public:
 	void SetData(TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh);
+	void GenerateMaze(int32 StartX, int32 StartY);
+	void InitializeMaze();
 
-public:
-	void GenrateMaze();
+	void SpawnMazeTiles();
+	void SpawnMazeWalls();
+
+	void MakeSperateWall(TSet<FVector>& PlacedWalls, int32 X, int32 Y);
 
 
 private:
@@ -40,4 +44,8 @@ private:
 	UPROPERTY()
 	TMap<ETileType, TObjectPtr<UStaticMesh>> GeneratorTileMesh;
 
+	// 미로 데이터 저장 (0 = 길, 1 = 벽, 2 = 입구, 3 = 출구)
+	TArray<TArray<int32>> MazeGrid;
+
+	bool bIsStart = false;
 };
