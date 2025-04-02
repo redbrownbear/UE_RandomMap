@@ -1,0 +1,2 @@
+﻿Name,SkeletalMesh,AnimClass,CollisionSphereRadius,CollisionCapsuleRadius,CollisionCapsuleHalfHeight,CollisionBoxExtent
+One,/Game/Resources/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn,/Game/Resources/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn,32,22,44,"(X=32.0,Y=32.0,Z=32.0)"

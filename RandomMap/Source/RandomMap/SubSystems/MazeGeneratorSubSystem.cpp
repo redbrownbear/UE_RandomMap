@@ -27,15 +27,41 @@ void UMazeGeneratorSubSystem::LoadTable()
 
 		for (FTileResourceData* Row : AllRows)
 		{
-			// 메시와 머티리얼 경로를 가져와서 풀에 저장
 			if (Row->TileMesh.Len() > 0)
 			{
 				UStaticMesh* LoadedMesh = LoadObject<UStaticMesh>(nullptr, *Row->TileMesh);
 				if (LoadedMesh)
 				{
-					MeshData.Add(Row->TileType, LoadedMesh);
+					ETileType tileType = ConvertStringToEnum(Row->TileType);
+
+					MeshData.Add(tileType, LoadedMesh);
+				}
+			}
+
+			if (Row->LightParticle.Len() > 0)
+			{
+				UParticleSystem* LoadedLight = LoadObject<UParticleSystem>(nullptr, *Row->LightParticle);
+				if (LoadedLight)
+				{
+					ETileType tileType = ConvertStringToEnum(Row->TileType);
+
+					LightData.Add(tileType, LoadedLight);
 				}
 			}
 		}
 	}
+}
+
+ETileType UMazeGeneratorSubSystem::ConvertStringToEnum(const FString& TypeString)
+{
+	UEnum* EnumPtr = StaticEnum<ETileType>();
+	if (!EnumPtr) return ETileType::END;
+	if (!EnumPtr)
+		return ETileType::END; // 예외 처리
+
+	int32 EnumValue = EnumPtr->GetValueByName(FName(*TypeString));
+	if (EnumValue == INDEX_NONE)
+		return ETileType::END;
+
+	return static_cast<ETileType>(EnumValue);
 }

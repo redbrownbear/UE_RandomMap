@@ -3,9 +3,12 @@
 
 #include "Actors/Map/DungeonMap.h"
 
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/PointLightComponent.h"
 
-constexpr int32 MazeWidth = 29;
-constexpr int32 MazeHeight = 29;
+
+constexpr int32 MazeWidth = 19;
+constexpr int32 MazeHeight = 19;
 
 constexpr int32 TileSizeX = 200;
 constexpr int32 TileSizeY = 200;
@@ -46,9 +49,10 @@ void ADungeonMap::Tick(float DeltaTime)
 
 }
 
-void ADungeonMap::SetData(TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh)
+void ADungeonMap::SetData(TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh, TMap < ETileType, TObjectPtr<UParticleSystem>> Light)
 {
     GeneratorTileMesh = TileMesh;
+    GeneratorLight = Light;
 
     InitializeMaze();
 
@@ -58,11 +62,12 @@ void ADungeonMap::SetData(TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh)
 // 랜덤 미로 생성 함수
 void ADungeonMap::GenerateMaze(int32 StartX, int32 StartY)
 {
-    MazeGrid[StartX][StartY] = 0;
+    MazeGrid[StartX][StartY] = EMeshType::MT_Ground;
 
+    //수정해야함
     if (bIsStart == false)
     {
-        MazeGrid[StartX ][StartY] = 2;
+        MazeGrid[StartX ][StartY] = EMeshType::MT_Entrance;
         bIsStart = true;
     }
 
@@ -75,9 +80,9 @@ void ADungeonMap::GenerateMaze(int32 StartX, int32 StartY)
         int32 NextY = StartY + Directions[Dir].Y;
 
         // 미로 범위 내에 있고 아직 방문하지 않은 경우
-        if (NextX > 0 && NextX < MazeWidth - 1 && NextY > 0 && NextY < MazeHeight - 1 && MazeGrid[NextX][NextY] == 1)
+        if (NextX > 0 && NextX < MazeWidth - 1 && NextY > 0 && NextY < MazeHeight - 1 && MazeGrid[NextX][NextY] == EMeshType::MT_Wall)
         {
-            MazeGrid[StartX + Directions[Dir].X / 2][StartY + Directions[Dir].Y / 2] = 0;
+            MazeGrid[StartX + Directions[Dir].X / 2][StartY + Directions[Dir].Y / 2] = EMeshType::MT_Ground;
 
             GenerateMaze(NextX, NextY);
         }
@@ -87,14 +92,13 @@ void ADungeonMap::GenerateMaze(int32 StartX, int32 StartY)
 // 미로 초기화 및 생성
 void ADungeonMap::InitializeMaze()
 {
-    // 미로 초기화 (벽으로 채우기)
     MazeGrid.SetNum(MazeWidth);
     for (int32 X = 0; X < MazeWidth; X++)
     {
         MazeGrid[X].SetNum(MazeHeight);
         for (int32 Y = 0; Y < MazeHeight; Y++)
         {
-            MazeGrid[X][Y] = 1;
+            MazeGrid[X][Y] = EMeshType::MT_Wall;
         }
     }
 
@@ -110,13 +114,13 @@ void ADungeonMap::SpawnMazeTiles()
         {
             UStaticMeshComponent* NewTile = NewObject<UStaticMeshComponent>(this);
             UStaticMesh* TileMesh = GeneratorTileMesh[ETileType::TT_Ground1];
-
             if (TileMesh)
             {
-                if (MazeGrid[X][Y] == 2)
+                FVector Location = FVector(X * TileSizeX, Y * TileSizeY, 0);
+                if (MazeGrid[X][Y] == EMeshType::MT_Entrance)
                 {
                     NewTile->SetStaticMesh(GeneratorTileMesh[ETileType::TT_Ground2]);
-                    NewTile->SetRelativeLocation(FVector(X * TileSizeX, Y * TileSizeY, 0));
+                    NewTile->SetRelativeLocation(Location);
                     NewTile->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
                     NewTile->RegisterComponent();
 
@@ -124,9 +128,16 @@ void ADungeonMap::SpawnMazeTiles()
                 }
 
                 NewTile->SetStaticMesh(TileMesh);
-                NewTile->SetRelativeLocation(FVector(X * TileSizeX, Y * TileSizeY, 0));
+                NewTile->SetRelativeLocation(Location);
                 NewTile->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
                 NewTile->RegisterComponent();
+            }
+
+            FVector TorchLocation = FVector(X * TileSizeX, Y * TileSizeY, 30);
+            FRotator TorchRotator = FRotator(0, 0, 0);
+            if (IsCorner(X, Y, TorchLocation, TorchRotator))
+            {
+                SpawnTorchWithLight(TorchLocation, TorchRotator, ETileType::TT_Torch1, ETileType::TT_Light2);
             }
         }
     }
@@ -142,12 +153,51 @@ void ADungeonMap::SpawnMazeWalls()
     {
         for (int32 Y = 0; Y < MazeHeight; Y++)
         {
-            if (MazeGrid[X][Y] == 1)
+            if (MazeGrid[X][Y] == EMeshType::MT_Wall)
             {
                 MakeSperateWall(PlacedWalls, X, Y);
             }
         }
     }  
+}
+
+void ADungeonMap::SpawnTorchWithLight(FVector Location, FRotator Rotator, ETileType TorchType, ETileType LightType)
+{
+    UStaticMeshComponent* NewTorch = NewObject<UStaticMeshComponent>(this);
+    UStaticMesh* TorchMesh = GeneratorTileMesh[TorchType];
+    if (TorchMesh)
+    {
+        NewTorch->SetStaticMesh(TorchMesh); // 횃불 메쉬 적용
+        NewTorch->SetRelativeLocation(Location);
+        NewTorch->SetRelativeRotation(Rotator);
+        NewTorch->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+        NewTorch->RegisterComponent();
+    }
+
+    UParticleSystemComponent* TorchFire = NewObject<UParticleSystemComponent>(this);
+    if (TorchFire)
+    {
+        UParticleSystem* FireParticle = GeneratorLight[LightType];
+        if (FireParticle)
+        {
+            TorchFire->SetTemplate(FireParticle);
+            TorchFire->SetRelativeLocation(FVector(0, 25, 60));
+            TorchFire->SetRelativeRotation_Direct(Rotator);
+            TorchFire->AttachToComponent(NewTorch, FAttachmentTransformRules::KeepRelativeTransform);
+            TorchFire->RegisterComponent();
+        }
+    }
+    UPointLightComponent* TorchLight = NewObject<UPointLightComponent>(this);
+    if (TorchLight)
+    {
+        TorchLight->SetIntensity(5000.0f);  // 광원 밝기 설정
+        TorchLight->SetLightColor(FLinearColor(1.0f, 0.5f, 0.2f));  // 주황빛
+        TorchLight->SetAttenuationRadius(300.0f); // 광원 범위
+        TorchLight->SetRelativeLocation(FVector(0, 0, 100)); // 살짝 위로 배치
+        TorchLight->AttachToComponent(TorchFire, FAttachmentTransformRules::KeepRelativeTransform);
+        TorchLight->RegisterComponent();
+    }
+
 }
 
 void ADungeonMap::MakeSperateWall(TSet<FVector>& PlacedWalls, int32 X, int32 Y)
@@ -165,6 +215,7 @@ void ADungeonMap::MakeSperateWall(TSet<FVector>& PlacedWalls, int32 X, int32 Y)
                 if (WallMesh)
                 {
                     NewWall->SetStaticMesh(WallMesh);
+
                     NewWall->SetRelativeScale3D(FVector(0.32, 0.32, 1));
                     NewWall->SetRelativeLocation(WallLocation);
                     NewWall->SetRelativeRotation((Dir == 0 || Dir == 1) ? FRotator(0, 90, 0) : FRotator(0, 0, 0));
@@ -176,4 +227,77 @@ void ADungeonMap::MakeSperateWall(TSet<FVector>& PlacedWalls, int32 X, int32 Y)
             }
         }
     }
+}
+
+bool ADungeonMap::IsCorner(int32 X, int32 Y, FVector& OutLocationOffset, FRotator& OutRotatorOffset)
+{
+    if (MazeGrid[X][Y] != EMeshType::MT_Ground)
+        return false;
+
+    if (X <= 0 || X >= MazeWidth - 1 || Y <= 0 || Y >= MazeHeight - 1)
+        return false;
+
+    struct CornerCheck
+    {
+        int32 DX1, DY1, DX2, DY2;
+        FVector LocationOffset;
+        FRotator RotatorOffset;
+    };
+
+    struct EndOpenCheck
+    {
+        int32 DX1, DY1, DX2, DY2, DX3, DY4;
+        FVector LocationOffset;
+        FRotator RotatorOffset;
+    };
+
+    const EndOpenCheck EndOpenTiles[] = {
+
+    {  0, -1,  1,  0,  0,  1, FVector(-80, 0, 0), FRotator(0, 270 ,0)},    // 좌단
+    {  1,  0,  0,  1, -1,  0, FVector(0, -80, 0), FRotator(0, 0, 0)},      // 상단
+    {  0,  1, -1,  0,  0, -1, FVector(80, 0, 0), FRotator(0, 90, 0)},      // 우단
+    { -1,  0,  0, -1,  1,  0, FVector(0, 80, 0), FRotator(0, 180 ,0)},     // 하단
+    };
+
+    const CornerCheck Corners[] = {
+
+        {  0, -1, -1,  0, FVector(-50, -80, 0), FRotator(0, 0 ,0)},   // 좌하단
+        { -1,  0,  0,  1, FVector(-80, 50, 0), FRotator(0, 270 ,0)},  // 좌상단
+        {  0,  1,  1,  0, FVector(50, 80, 0), FRotator(0, 180 ,0)},   // 우상단
+        {  1,  0,  0, -1, FVector(80, -50, 0), FRotator(0, 90 ,0)},   // 우하단
+    };
+
+    for (const EndOpenCheck& EndOpen : EndOpenTiles)
+    {
+        if (MazeGrid[X + EndOpen.DX1][Y + EndOpen.DY1] == EMeshType::MT_Ground &&
+            MazeGrid[X + EndOpen.DX2][Y + EndOpen.DY2] == EMeshType::MT_Ground &&
+            MazeGrid[X + EndOpen.DX3][Y + EndOpen.DY4] == EMeshType::MT_Ground)
+        {
+            OutLocationOffset = OutLocationOffset + EndOpen.LocationOffset;
+            OutRotatorOffset = EndOpen.RotatorOffset;
+            return true;
+        }
+
+        if (MazeGrid[X + EndOpen.DX1][Y + EndOpen.DY1] == EMeshType::MT_Wall &&
+            MazeGrid[X + EndOpen.DX2][Y + EndOpen.DY2] == EMeshType::MT_Wall &&
+            MazeGrid[X + EndOpen.DX3][Y + EndOpen.DY4] == EMeshType::MT_Wall)
+        {
+            OutLocationOffset = OutLocationOffset - EndOpen.LocationOffset;
+            OutRotatorOffset = EndOpen.RotatorOffset + FRotator(0, 180, 0);
+            return true;
+        }
+    }
+
+    for (const CornerCheck& Corner : Corners)
+    {
+        if (MazeGrid[X + Corner.DX1][Y + Corner.DY1] == EMeshType::MT_Wall &&
+            MazeGrid[X + Corner.DX2][Y + Corner.DY2] == EMeshType::MT_Wall)
+        {
+            OutLocationOffset = OutLocationOffset + Corner.LocationOffset;
+            OutRotatorOffset = Corner.RotatorOffset;
+            return true;
+        }
+    }
+
+    return false;
 }

@@ -14,23 +14,27 @@ enum class ETileType : uint8
     TT_Wall1  UMETA(DisplayName = "Wall1"),
     TT_Wall2  UMETA(DisplayName = "Wall2"),
     TT_Wall3  UMETA(DisplayName = "Wall3"),
+    TT_Torch1 UMETA(DisplayName = "Torch1"),
+    TT_Torch2 UMETA(DisplayName = "Torch2"),
+    TT_Torch3 UMETA(DisplayName = "Torch3"),
+    TT_Light1 UMETA(DisplayName = "Light1"),
+    TT_Light2 UMETA(DisplayName = "Light2"),
+    TT_Light3 UMETA(DisplayName = "Light3"),
 
     END,
 };
 
-ENUM_RANGE_BY_COUNT(ETileType, ETileType::END);
-
-USTRUCT(BlueprintType)  // 블루프린트에서 사용 가능하도록 설정
+USTRUCT(BlueprintType)
 struct FTileResourceData : public FTableRowBase
 {
     GENERATED_BODY()
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
-    ETileType TileType;
+    UPROPERTY(EditAnywhere, Category = "Tile")
+    FString TileType;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
+    UPROPERTY(EditAnywhere, Category = "Tile")
     FString TileMesh;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tile")
-    FString TileMaterial;
+    UPROPERTY(EditAnywhere, Category = "Tile")
+    FString LightParticle;
 };

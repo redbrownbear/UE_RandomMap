@@ -9,6 +9,18 @@
 
 #include "DungeonMap.generated.h"
 
+
+enum EMeshType : uint8
+{
+	MT_Ground,
+	MT_Entrance,
+	MT_Exit,
+	MT_Wall,
+	MT_Torch,
+	
+	END,
+};
+
 UCLASS()
 class RANDOMMAP_API ADungeonMap : public AActor
 {
@@ -27,15 +39,18 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 public:
-	void SetData(TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh);
+	void SetData(TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh, TMap < ETileType, TObjectPtr<UParticleSystem>> Light);
 	void GenerateMaze(int32 StartX, int32 StartY);
 	void InitializeMaze();
 
 	void SpawnMazeTiles();
 	void SpawnMazeWalls();
+	void SpawnTorchWithLight(FVector Location, FRotator Rotator, ETileType TorchType, ETileType LightType);
 
 	void MakeSperateWall(TSet<FVector>& PlacedWalls, int32 X, int32 Y);
 
+private:
+	bool IsCorner(int32 X, int32 Y, FVector& OutLocationOffset, FRotator& OutRotatorOffset);
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -44,8 +59,10 @@ private:
 	UPROPERTY()
 	TMap<ETileType, TObjectPtr<UStaticMesh>> GeneratorTileMesh;
 
-	// 미로 데이터 저장 (0 = 길, 1 = 벽, 2 = 입구, 3 = 출구)
-	TArray<TArray<int32>> MazeGrid;
+	UPROPERTY()
+	TMap < ETileType, TObjectPtr<UParticleSystem>> GeneratorLight;
+
+	TArray<TArray<EMeshType>> MazeGrid;
 
 	bool bIsStart = false;
 };

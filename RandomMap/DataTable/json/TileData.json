@@ -1,0 +1,74 @@
+[
+ {
+   "Name": "Ground_Noraml",
+   "TileType": "TT_Ground1",
+   "TileMesh": "/Game/Resources/Dungeon/Meshes/Props/SM_Ground.SM_Ground",
+   "LightParticle": ""
+ },
+ {
+   "Name": "Ground_Start",
+   "TileType": "TT_Ground2",
+   "TileMesh": "/Game/Resources/Dungeon/Meshes/Props/SM_Ground_01.SM_Ground_01",
+   "LightParticle": ""
+ },
+ {
+   "Name": "Ground_End",
+   "TileType": "TT_Ground3",
+   "TileMesh": "/Game/Resources/Dungeon/Meshes/Props/SM_Ground_01.SM_Ground_01",
+   "LightParticle": ""
+ },
+ {
+   "Name": "Wall_Normal1",
+   "TileType": "TT_Wall1",
+   "TileMesh": "/Game/Resources/Dungeon/Meshes/Props/SM_Wall_00.SM_Wall_00",
+   "LightParticle": ""
+ },
+ {
+   "Name": "Wall_Normal2",
+   "TileType": "TT_Wall2",
+   "TileMesh": "/Game/Resources/Dungeon/Meshes/Props/SM_Wall_01.SM_Wall_01",
+   "LightParticle": ""
+ },
+ {
+   "Name": "Wall_Noraml3",
+   "TileType": "TT_Wall3",
+   "TileMesh": "",
+   "LightParticle": ""
+ },
+ {
+   "Name": "Torch_Ground",
+   "TileType": "TT_Torch1",
+   "TileMesh": "/Game/Resources/Dungeon/Meshes/Props/SM_Torch.SM_Torch",
+   "LightParticle": ""
+ },
+ {
+   "Name": "Torch_Wall",
+   "TileType": "TT_Torch2",
+   "TileMesh": "/Game/Resources/Dungeon/Meshes/Props/SM_Torch.SM_Torch",
+   "LightParticle": ""
+ },
+ {
+   "Name": "Torch_Dummy",
+   "TileType": "TT_Torch3",
+   "TileMesh": "",
+   "LightParticle": ""
+ },
+ {
+   "Name": "Light_Noraml1",
+   "TileType": "TT_Light1",
+   "TileMesh": "",
+   "LightParticle": "/Game/Resources/Dungeon/Fire/Particle_Systems/PS_Fire_00.PS_Fire_00"
+ },
+ {
+   "Name": "Light_Noraml2",
+   "TileType": "TT_Light2",
+   "TileMesh": "",
+   "LightParticle": "/Game/Resources/Dungeon/Fire/Particle_Systems/PS_Fire_01.PS_Fire_01"
+ },
+ {
+   "Name": "Light_Noraml3",
+   "TileType": "TT_Light3",
+   "TileMesh": "",
+   "LightParticle": ""
+ }
+]

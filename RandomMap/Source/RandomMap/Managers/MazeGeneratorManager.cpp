@@ -24,8 +24,9 @@ void UMazeGeneratorManager::GenerateMap()
 	if (MazeSubsystem)
 	{
 		TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh = MazeSubsystem->GetMeshFromTable();
+		TMap<ETileType, TObjectPtr<UParticleSystem>> LightParticle = MazeSubsystem->GetLightFromTable();
 
-		DungeonMap->SetData(TileMesh);
+		DungeonMap->SetData(TileMesh, LightParticle);
 	}
 	else
 	{

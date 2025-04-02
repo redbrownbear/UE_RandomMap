@@ -1,0 +1,13 @@
+﻿Name,TileType,TileMesh,LightParticle
+Ground_Noraml,TT_Ground1,/Game/Resources/Dungeon/Meshes/Props/SM_Ground.SM_Ground,
+Ground_Start,TT_Ground2,/Game/Resources/Dungeon/Meshes/Props/SM_Ground_01.SM_Ground_01,
+Ground_End,TT_Ground3,/Game/Resources/Dungeon/Meshes/Props/SM_Ground_01.SM_Ground_01,
+Wall_Normal1,TT_Wall1,/Game/Resources/Dungeon/Meshes/Props/SM_Wall_00.SM_Wall_00,
+Wall_Normal2,TT_Wall2,/Game/Resources/Dungeon/Meshes/Props/SM_Wall_01.SM_Wall_01,
+Wall_Noraml3,TT_Wall3,,
+Torch_Ground,TT_Torch1,/Game/Resources/Dungeon/Meshes/Props/SM_Torch.SM_Torch,
+Torch_Wall,TT_Torch2,/Game/Resources/Dungeon/Meshes/Props/SM_Torch.SM_Torch,
+Torch_Dummy,TT_Torch3,,
+Light_Noraml1,TT_Light1,,/Game/Resources/Dungeon/Fire/Particle_Systems/PS_Fire_00.PS_Fire_00
+Light_Noraml2,TT_Light2,,/Game/Resources/Dungeon/Fire/Particle_Systems/PS_Fire_01.PS_Fire_01
+Light_Noraml3,TT_Light3,,
