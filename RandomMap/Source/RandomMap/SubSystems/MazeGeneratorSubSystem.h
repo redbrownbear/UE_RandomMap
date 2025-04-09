@@ -36,7 +36,7 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere, Category = "ResourceTile")
-	UDataTable* ItemDataTable;
+	UDataTable* DataTable;
 
 	UPROPERTY()
 	TMap<ETileType, TObjectPtr<UStaticMesh>> MeshData;

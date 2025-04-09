@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 
+#include "SubSystems/PlayerManagementSubSystem.h"
 #include "Misc/Utils.h"
 
 #include "BasicCharacter.generated.h"
@@ -25,6 +26,10 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+protected:
+	virtual void SetData(EPlayerType PlayerType);
 
 public:	
 	// Called every frame

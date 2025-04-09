@@ -11,19 +11,19 @@ UMazeGeneratorSubSystem::UMazeGeneratorSubSystem()
 
 void UMazeGeneratorSubSystem::LoadTable()
 {
-	if (!ItemDataTable)
+	if (!DataTable)
 	{
 		static ConstructorHelpers::FObjectFinder<UDataTable> Asset(TEXT("/Script/Engine.DataTable'/Game/Data/TileDataTable.TileDataTable'"));
 		check(Asset.Object);
-		ItemDataTable = Asset.Object;
+		DataTable = Asset.Object;
 	}
 
 	// 데이터 테이블을 통해 아이템 리소스를 초기화
-	if (ItemDataTable)
+	if (DataTable)
 	{
 		// 테이블에서 각 행을 가져옴
 		TArray<FTileResourceData*> AllRows;
-		ItemDataTable->GetAllRows(TEXT("GetAllRows"), AllRows);
+		DataTable->GetAllRows(TEXT("GetAllRows"), AllRows);
 
 		for (FTileResourceData* Row : AllRows)
 		{
@@ -55,9 +55,8 @@ void UMazeGeneratorSubSystem::LoadTable()
 ETileType UMazeGeneratorSubSystem::ConvertStringToEnum(const FString& TypeString)
 {
 	UEnum* EnumPtr = StaticEnum<ETileType>();
-	if (!EnumPtr) return ETileType::END;
-	if (!EnumPtr)
-		return ETileType::END; // 예외 처리
+	if (!EnumPtr) 
+		return ETileType::END;
 
 	int32 EnumValue = EnumPtr->GetValueByName(FName(*TypeString));
 	if (EnumValue == INDEX_NONE)

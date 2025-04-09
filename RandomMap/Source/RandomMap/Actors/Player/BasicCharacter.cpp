@@ -22,6 +22,37 @@ void ABasicCharacter::BeginPlay()
 	
 }
 
+void ABasicCharacter::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+}
+
+void ABasicCharacter::SetData(EPlayerType PlayerType)
+{
+	UPlayerManagementSubSystem* Subsystem = GetWorld()->GetGameInstance()->GetSubsystem<UPlayerManagementSubSystem>();
+	if (Subsystem)
+	{
+		FPlayerResourceData* PlayerResourceData = Subsystem->GetPlayerResourceData(PlayerType);
+		if (PlayerResourceData)
+		{	
+			UCapsuleComponent* Capsule = GetCapsuleComponent();
+			if (!FMath::IsNearlyEqual(Capsule->GetUnscaledCapsuleHalfHeight(), PlayerResourceData->CollisionCapsuleHalfHeight))
+			{
+				Capsule->SetCapsuleHalfHeight(PlayerResourceData->CollisionCapsuleHalfHeight, false);
+			}
+		
+		
+			USkeletalMeshComponent* SkeletalMeshComponent = GetMesh();
+			SkeletalMeshComponent->SetSkeletalMesh(PlayerResourceData->SkeletalMesh.Get());
+			SkeletalMeshComponent->SetRelativeTransform(FTransform::Identity);
+			SkeletalMeshComponent->SetWorldLocation(FVector(200.0, 200.0, 0));
+			SkeletalMeshComponent->SetWorldRotation(FRotator(180.0, 180.0, 180.0));
+
+			//SkeletalMeshComponent->SetAnimClass(CharacterData->AnimClass);
+		}
+	}
+}
+
 // Called every frame
 void ABasicCharacter::Tick(float DeltaTime)
 {

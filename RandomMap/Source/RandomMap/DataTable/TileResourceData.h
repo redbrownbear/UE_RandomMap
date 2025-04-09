@@ -8,6 +8,8 @@
 UENUM(BlueprintType)
 enum class ETileType : uint8
 {
+    None,
+
     TT_Ground1 UMETA(DisplayName = "Ground1"),
     TT_Ground2 UMETA(DisplayName = "Ground2"),
     TT_Ground3 UMETA(DisplayName = "Ground3"),

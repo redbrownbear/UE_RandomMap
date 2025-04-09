@@ -12,6 +12,17 @@
 #include "PlayerResourceData.generated.h"
 
 
+UENUM(BlueprintType)
+enum class EPlayerType : uint8
+{
+	None,
+
+	PT_One UMETA(DisplayName = "One"),
+	PT_Two UMETA(DisplayName = "Two"),
+
+	END,
+};
+
 USTRUCT(BlueprintType)
 struct FPlayerResourceData : public FTableRowBase
 {
@@ -19,7 +30,10 @@ struct FPlayerResourceData : public FTableRowBase
 
 public:
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
-	FString SkeletalMesh;
+	EPlayerType PlayerType;
+
+	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
+	TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Animation")
