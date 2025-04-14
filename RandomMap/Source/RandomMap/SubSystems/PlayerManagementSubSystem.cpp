@@ -33,6 +33,8 @@ void UPlayerManagementSubSystem::LoadTable()
 					PlayerResourceDataArray.Add(*PlayerResourceData);
 				}
 			}
+
+			PlayerResourceDataTable = PlayerResourceDataArray;
 		}
 	}
 }

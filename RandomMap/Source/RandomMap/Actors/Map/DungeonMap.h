@@ -40,8 +40,11 @@ public:
 
 public:
 	void SetData(TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh, TMap < ETileType, TObjectPtr<UParticleSystem>> Light);
+	
+private:
 	void GenerateMaze(int32 StartX, int32 StartY);
 	void InitializeMaze();
+	void PointingExit();
 
 	void SpawnMazeTiles();
 	void SpawnMazeWalls();
@@ -50,6 +53,9 @@ public:
 	void MakeSperateWall(TSet<FVector>& PlacedWalls, int32 X, int32 Y);
 
 private:
+	void SetMeshType(int32 X, int32 Y, EMeshType MeshType);
+	void SetDeadEndTile(int32 X, int32 Y);
+
 	bool IsCorner(int32 X, int32 Y, FVector& OutLocationOffset, FRotator& OutRotatorOffset);
 
 private:
@@ -61,6 +67,9 @@ private:
 
 	UPROPERTY()
 	TMap < ETileType, TObjectPtr<UParticleSystem>> GeneratorLight;
+
+	UPROPERTY()
+	TArray<FIntPoint> DeadEnds;
 
 	TArray<TArray<EMeshType>> MazeGrid;
 

@@ -33,7 +33,7 @@ public:
 	EPlayerType PlayerType;
 
 	UPROPERTY(EditAnywhere, Category = "PlayerMesh")
-	TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+	USkeletalMesh* SkeletalMesh;
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Animation")

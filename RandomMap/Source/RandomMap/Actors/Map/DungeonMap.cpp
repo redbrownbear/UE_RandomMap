@@ -6,9 +6,11 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/PointLightComponent.h"
 
+#include "Actors/Trigger/ExitTrigger.h"
 
-constexpr int32 MazeWidth = 19;
-constexpr int32 MazeHeight = 19;
+
+constexpr int32 MazeWidth = 9;
+constexpr int32 MazeHeight = 9;
 
 constexpr int32 TileSizeX = 200;
 constexpr int32 TileSizeY = 200;
@@ -62,12 +64,12 @@ void ADungeonMap::SetData(TMap<ETileType, TObjectPtr<UStaticMesh>> TileMesh, TMa
 // 랜덤 미로 생성 함수
 void ADungeonMap::GenerateMaze(int32 StartX, int32 StartY)
 {
-    MazeGrid[StartX][StartY] = EMeshType::MT_Ground;
+    SetMeshType(StartX, StartY, EMeshType::MT_Ground);
 
     //수정해야함
     if (bIsStart == false)
     {
-        MazeGrid[StartX ][StartY] = EMeshType::MT_Entrance;
+        SetMeshType(StartX, StartY, EMeshType::MT_Entrance);
         bIsStart = true;
     }
 
@@ -82,7 +84,7 @@ void ADungeonMap::GenerateMaze(int32 StartX, int32 StartY)
         // 미로 범위 내에 있고 아직 방문하지 않은 경우
         if (NextX > 0 && NextX < MazeWidth - 1 && NextY > 0 && NextY < MazeHeight - 1 && MazeGrid[NextX][NextY] == EMeshType::MT_Wall)
         {
-            MazeGrid[StartX + Directions[Dir].X / 2][StartY + Directions[Dir].Y / 2] = EMeshType::MT_Ground;
+            SetMeshType(StartX + Directions[Dir].X / 2, StartY + Directions[Dir].Y / 2, EMeshType::MT_Ground);
 
             GenerateMaze(NextX, NextY);
         }
@@ -98,14 +100,30 @@ void ADungeonMap::InitializeMaze()
         MazeGrid[X].SetNum(MazeHeight);
         for (int32 Y = 0; Y < MazeHeight; Y++)
         {
-            MazeGrid[X][Y] = EMeshType::MT_Wall;
+            SetMeshType(X, Y, EMeshType::MT_Wall);
         }
     }
 
     GenerateMaze(1, 1);
+    PointingExit();
 }
 
-// 미로를 타일로 변환하여 생성
+
+void ADungeonMap::PointingExit()
+{
+    for (int32 X = 1; X < MazeWidth -1; X++)
+    {
+        MazeGrid[X].SetNum(MazeHeight);
+        for (int32 Y = 1; Y < MazeHeight -1; Y++)
+        {
+            SetDeadEndTile(X, Y);
+        }
+    }
+
+    FIntPoint ExitPoint = DeadEnds[FMath::RandRange(0, DeadEnds.Num() - 1)];
+    MazeGrid[ExitPoint.X][ExitPoint.Y] = EMeshType::MT_Exit;
+}
+
 void ADungeonMap::SpawnMazeTiles()
 {
     for (int32 X = 0; X < MazeWidth; X++)
@@ -123,6 +141,18 @@ void ADungeonMap::SpawnMazeTiles()
                     NewTile->SetRelativeLocation(Location);
                     NewTile->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
                     NewTile->RegisterComponent();
+
+                    continue;
+                }
+
+                if (MazeGrid[X][Y] == EMeshType::MT_Exit)
+                {
+                    NewTile->SetStaticMesh(GeneratorTileMesh[ETileType::TT_Ground2]);
+                    NewTile->SetRelativeLocation(Location);
+                    NewTile->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+                    NewTile->RegisterComponent();
+
+                    GetWorld()->SpawnActor<AExitTrigger>(AExitTrigger::StaticClass(), Location + FVector(0, 0, 50.f), FRotator::ZeroRotator);
 
                     continue;
                 }
@@ -163,6 +193,7 @@ void ADungeonMap::SpawnMazeWalls()
 
 void ADungeonMap::SpawnTorchWithLight(FVector Location, FRotator Rotator, ETileType TorchType, ETileType LightType)
 {
+
     UStaticMeshComponent* NewTorch = NewObject<UStaticMeshComponent>(this);
     UStaticMesh* TorchMesh = GeneratorTileMesh[TorchType];
     if (TorchMesh)
@@ -229,6 +260,40 @@ void ADungeonMap::MakeSperateWall(TSet<FVector>& PlacedWalls, int32 X, int32 Y)
     }
 }
 
+void ADungeonMap::SetMeshType(int32 X, int32 Y, EMeshType MeshType)
+{
+    MazeGrid[X][Y] = MeshType;
+}
+
+void ADungeonMap::SetDeadEndTile(int32 X, int32 Y)
+{
+    if (X == 1 && Y == 1)
+        return;
+
+    struct EndOpenCheck
+    {
+        int32 DX1, DY1, DX2, DY2, DX3, DY3;
+    };
+
+    const EndOpenCheck EndOpenTiles[] = {
+
+    {  0, -1,  1,  0,  0,  1 },      // 좌단
+    {  1,  0,  0,  1, -1,  0 },      // 상단
+    {  0,  1, -1,  0,  0, -1 },      // 우단
+    { -1,  0,  0, -1,  1,  0 },      // 하단
+    };
+
+    for (const EndOpenCheck& EndOpen : EndOpenTiles)
+    {
+        if (MazeGrid[X + EndOpen.DX1][Y + EndOpen.DY1] == EMeshType::MT_Wall &&
+            MazeGrid[X + EndOpen.DX2][Y + EndOpen.DY2] == EMeshType::MT_Wall &&
+            MazeGrid[X + EndOpen.DX3][Y + EndOpen.DY3] == EMeshType::MT_Wall)
+        {
+            DeadEnds.Add(FIntPoint(X, Y));
+        }
+    }
+}
+
 bool ADungeonMap::IsCorner(int32 X, int32 Y, FVector& OutLocationOffset, FRotator& OutRotatorOffset)
 {
     if (MazeGrid[X][Y] != EMeshType::MT_Ground)
@@ -237,16 +302,17 @@ bool ADungeonMap::IsCorner(int32 X, int32 Y, FVector& OutLocationOffset, FRotato
     if (X <= 0 || X >= MazeWidth - 1 || Y <= 0 || Y >= MazeHeight - 1)
         return false;
 
-    struct CornerCheck
+
+    struct EndOpenCheck
     {
-        int32 DX1, DY1, DX2, DY2;
+        int32 DX1, DY1, DX2, DY2, DX3, DY3;
         FVector LocationOffset;
         FRotator RotatorOffset;
     };
 
-    struct EndOpenCheck
+    struct CornerCheck
     {
-        int32 DX1, DY1, DX2, DY2, DX3, DY4;
+        int32 DX1, DY1, DX2, DY2;
         FVector LocationOffset;
         FRotator RotatorOffset;
     };
@@ -271,7 +337,7 @@ bool ADungeonMap::IsCorner(int32 X, int32 Y, FVector& OutLocationOffset, FRotato
     {
         if (MazeGrid[X + EndOpen.DX1][Y + EndOpen.DY1] == EMeshType::MT_Ground &&
             MazeGrid[X + EndOpen.DX2][Y + EndOpen.DY2] == EMeshType::MT_Ground &&
-            MazeGrid[X + EndOpen.DX3][Y + EndOpen.DY4] == EMeshType::MT_Ground)
+            MazeGrid[X + EndOpen.DX3][Y + EndOpen.DY3] == EMeshType::MT_Ground)
         {
             OutLocationOffset = OutLocationOffset + EndOpen.LocationOffset;
             OutRotatorOffset = EndOpen.RotatorOffset;
@@ -280,7 +346,7 @@ bool ADungeonMap::IsCorner(int32 X, int32 Y, FVector& OutLocationOffset, FRotato
 
         if (MazeGrid[X + EndOpen.DX1][Y + EndOpen.DY1] == EMeshType::MT_Wall &&
             MazeGrid[X + EndOpen.DX2][Y + EndOpen.DY2] == EMeshType::MT_Wall &&
-            MazeGrid[X + EndOpen.DX3][Y + EndOpen.DY4] == EMeshType::MT_Wall)
+            MazeGrid[X + EndOpen.DX3][Y + EndOpen.DY3] == EMeshType::MT_Wall)
         {
             OutLocationOffset = OutLocationOffset - EndOpen.LocationOffset;
             OutRotatorOffset = EndOpen.RotatorOffset + FRotator(0, 180, 0);

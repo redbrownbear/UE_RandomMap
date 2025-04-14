@@ -41,6 +41,9 @@ public:
 
 protected:
 	/** Please add a variable description */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USpringArmComponent> SpringArm;
+
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	TObjectPtr<UCameraComponent> Camera;
 };

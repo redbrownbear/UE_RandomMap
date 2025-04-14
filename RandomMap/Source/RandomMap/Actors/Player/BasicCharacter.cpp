@@ -10,9 +10,18 @@ ABasicCharacter::ABasicCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	GetCapsuleComponent()->SetCollisionProfileName(CollisionProfileName::Player);
+
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(RootComponent);
+	Camera->bUsePawnControlRotation = true;
+
+	const FRotator Rotation = FRotator(0., 0.0, 0.);
+	const FVector Translation = FVector(20.0, 0.0, 150.0);
+	FTransform CameraTransform = FTransform(Rotation, Translation, FVector::OneVector);
+	Camera->SetRelativeTransform(CameraTransform);
 
 	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called when the game starts or when spawned
@@ -25,6 +34,8 @@ void ABasicCharacter::BeginPlay()
 void ABasicCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+
+	SetData(EPlayerType::PT_One);
 }
 
 void ABasicCharacter::SetData(EPlayerType PlayerType)
@@ -43,13 +54,29 @@ void ABasicCharacter::SetData(EPlayerType PlayerType)
 		
 		
 			USkeletalMeshComponent* SkeletalMeshComponent = GetMesh();
-			SkeletalMeshComponent->SetSkeletalMesh(PlayerResourceData->SkeletalMesh.Get());
+			SkeletalMeshComponent->SetSkeletalMesh(PlayerResourceData->SkeletalMesh);
 			SkeletalMeshComponent->SetRelativeTransform(FTransform::Identity);
-			SkeletalMeshComponent->SetWorldLocation(FVector(200.0, 200.0, 0));
-			SkeletalMeshComponent->SetWorldRotation(FRotator(180.0, 180.0, 180.0));
+			SkeletalMeshComponent->SetRelativeRotation(FRotator(0.0, -90.0, 0.0));
+			
+			SkeletalMeshComponent->SetVisibility(false);
+			SkeletalMeshComponent->bCastHiddenShadow = true;
+			
 
 			//SkeletalMeshComponent->SetAnimClass(CharacterData->AnimClass);
+			
+			//SkeletalMeshComponent->bOwnerNoSee = true;
 		}
+	}
+
+	{
+		UCharacterMovementComponent* Movement = GetCharacterMovement();
+		Movement->bOrientRotationToMovement = true;
+		Movement->MaxWalkSpeed = 500.0;
+	}
+
+	{
+		this->SetActorLocation(FVector(200.0, 200.0, 3000.0));
+
 	}
 }
 
