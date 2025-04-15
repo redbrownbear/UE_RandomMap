@@ -2,6 +2,8 @@
 
 
 #include "Actors/Trigger/ExitTrigger.h"
+#include "Kismet/GameplayStatics.h"
+
 #include "Misc/Utils.h"
 
 #include "Actors/Player/BasicCharacter.h"
@@ -15,7 +17,7 @@ AExitTrigger::AExitTrigger()
 
 	TriggerZone = CreateDefaultSubobject<UBoxComponent>(TEXT("TriggerBox"));
 	RootComponent = TriggerZone;
-	TriggerZone->SetBoxExtent(FVector(200.f, 200.f, 100.f));
+	TriggerZone->SetBoxExtent(FVector(130.f, 130.f, 100.f));
 	TriggerZone->SetCollisionProfileName(CollisionProfileName::Player);
 }
 
@@ -45,6 +47,9 @@ void AExitTrigger::NotifyActorBeginOverlap(AActor* OtherActor)
 			FColor::Green,              // 색깔
 			TEXT("출구 도달!")          // 메시지 내용
 		);
+		
+
+		UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
 	}
 
 }
